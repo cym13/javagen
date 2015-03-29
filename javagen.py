@@ -80,10 +80,6 @@ def main():
     if args["--class"]:
         print(constructor(args["--class"], list(zip(args["ATT"],args["TYPE"]))))
 
-    if not args["--getters"] and not args["--setters"]:
-        args["--getters"] = True
-        args["--setters"] = True
-
     for att, att_type in zip(args["ATT"], args["TYPE"]):
         if args["--getters"]:
             print(getter(att, att_type))
