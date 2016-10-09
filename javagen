@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Usage: javagen [-h] [-g] [-s] [-t] [-c classname] (TYPE ATT)...
+Usage: javagen [-h] [--stdout] [-g] [-s] [-t] [-c classname] (TYPE ATT)...
 
 Arguments:
     TYPE    Attribute type
@@ -13,6 +13,8 @@ Options:
     -s, --setters           Generate setters
     -t, --tostring          Generate toString method
     -c, --class classname   Name of the class
+                            Output to the corresponding file
+    --stdout                Force output to stdout
 """
 
 from docopt import docopt
@@ -67,30 +69,45 @@ def tostring(classname, attributes):
 
 
 def main():
-    args = docopt(__doc__)
+    args       = docopt(__doc__)
+    class_name = args["--class"]
+    setters    = args["--setters"]
+    getters    = args["--getters"]
+    tostrings  = args["--tostring"]
+    nofile     = args["--stdout"]
+    att_name   = args["ATT"]
+    att_type   = args["TYPE"]
+    output     = []
 
-    if args["--class"]:
-        print(gen_class(args["--class"]))
+    if class_name:
+        output.append(gen_class(class_name))
 
-    for att, att_type in zip(args["ATT"], args["TYPE"]):
-        print(definition(att, att_type))
+    for att, att_type in zip(att_name, att_type):
+        output.append(definition(att, att_type))
 
-    print()
+    output.append("")
 
-    if args["--class"]:
-        print(constructor(args["--class"], list(zip(args["ATT"],args["TYPE"]))))
+    if class_name:
+        output.append(constructor(class_name, list(zip(att_name,att_type))))
 
-    for att, att_type in zip(args["ATT"], args["TYPE"]):
-        if args["--getters"]:
-            print(getter(att, att_type))
-        if args["--setters"]:
-            print(setter(att, att_type))
+    for att, att_type in zip(att_name, att_type):
+        if getters:
+            output.append(getter(att, att_type))
+        if setters:
+            output.append(setter(att, att_type))
 
-    if args["--tostring"]:
-        print(tostring(args["--class"], args["ATT"]))
+    if tostring:
+        output.append(tostring(class_name, att_name))
 
-    if args["--class"]:
-        print("}")
+    if class_name:
+        output.append("}")
+
+    if nofile:
+        print("\n".join(output))
+    else:
+        with open(class_name + ".java", "w") as f:
+            f.write("\n".join(output))
+            f.write("\n")
 
 if __name__ == "__main__":
     main()
